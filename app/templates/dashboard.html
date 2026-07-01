@@ -1,0 +1,8 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>Binance Short Monitor</title>
+<style>body{font-family:Arial,sans-serif;background:#0f172a;color:#e2e8f0;margin:24px}table{border-collapse:collapse;width:100%;margin:16px 0}td,th{border-bottom:1px solid #334155;padding:8px;text-align:right}td:first-child,th:first-child{text-align:left}.l3{color:#f87171}.l2{color:#facc15}.l1{color:#38bdf8}</style></head>
+<body><h1>Binance 永续高位开空监控器</h1><p>监控涨幅榜 Top N 与手动自选币；Level 3 为候选开空，仍需人工确认。</p>
+<h2>最新快照</h2><table><tr><th>Symbol</th><th>Level</th><th>Score</th><th>Price</th><th>1h%</th><th>4h%</th><th>24h%</th><th>RSI15m</th><th>Funding</th><th>Reason</th><th>Time</th></tr>
+{% for s in snapshots %}<tr><td>{{s.symbol}}</td><td class="l{{s.level}}">{{s.level}}</td><td>{{"%.1f"|format(s.score)}}</td><td>{{s.price}}</td><td>{{"%.2f"|format(s.change_1h)}}</td><td>{{"%.2f"|format(s.change_4h)}}</td><td>{{"%.2f"|format(s.change_24h)}}</td><td>{{"%.1f"|format(s.rsi_15m)}}</td><td>{{"%.4f"|format(s.funding_rate*100)}}%</td><td style="text-align:left">{{s.reason}}</td><td>{{s.created_at}}</td></tr>{% endfor %}</table>
+<h2>候选信号</h2><table><tr><th>Symbol</th><th>Score</th><th>Entry</th><th>SL</th><th>TP1</th><th>TP2</th><th>Reason</th><th>Time</th></tr>
+{% for s in signals %}<tr><td>{{s.symbol}}</td><td>{{"%.1f"|format(s.score)}}</td><td>{{s.entry_min}} ~ {{s.entry_max}}</td><td>{{s.stop_loss}}</td><td>{{s.take_profit_1}}</td><td>{{s.take_profit_2}}</td><td style="text-align:left">{{s.reason}}</td><td>{{s.created_at}}</td></tr>{% endfor %}</table>
+</body></html>
