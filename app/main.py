@@ -39,7 +39,9 @@ async def dashboard(request: Request):
     async with SessionLocal() as session:
         snapshots = (await session.execute(select(Snapshot).order_by(desc(Snapshot.created_at)).limit(50))).scalars().all()
         signals = (await session.execute(select(Signal).order_by(desc(Signal.created_at)).limit(20))).scalars().all()
-    return templates.TemplateResponse("dashboard.html", {"request": request, "snapshots": snapshots, "signals": signals})
+    return templates.TemplateResponse(
+    request, "dashboard.html", {"snapshots": snapshots, "signals": signals}
+)
 
 
 @app.get("/api/snapshots")
