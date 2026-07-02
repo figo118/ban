@@ -61,15 +61,15 @@
       <tr>
         <td>{{s.symbol}}</td>
         <td class="l{{s.level}}">{{s.level}}级</td>
-        <td>{{"%.1f"|format(s.score)}}</td>
+        <td>{{"%.1f"|format(s.score or 0)}}</td>
         <td>{{s.price}}</td>
-        <td>{{"%.2f"|format(s.change_1h)}}%</td>
-        <td>{{"%.2f"|format(s.change_4h)}}%</td>
-        <td>{{"%.2f"|format(s.change_24h)}}%</td>
-        <td>{{"%.1f"|format(s.rsi_15m)}}</td>
-        <td>{{"%.2f"|format(s.oi_change_15m)}}%</td>
-        <td>{{"%.2f"|format(s.long_short_ratio)}}</td>
-        <td>{{"%.2f"|format(s.taker_buy_ratio)}}</td>
+        <td>{{"%.2f"|format(s.change_1h or 0)}}%</td>
+        <td>{{"%.2f"|format(s.change_4h or 0)}}%</td>
+        <td>{{"%.2f"|format(s.change_24h or 0)}}%</td>
+        <td>{{"%.1f"|format(s.rsi_15m or 0)}}</td>
+        <td>{{"%.2f"|format(s.oi_change_15m or 0)}}%</td>
+        <td>{{"%.2f"|format(s.long_short_ratio or 0)}}</td>
+        <td>{{"%.2f"|format(s.taker_buy_ratio or 0)}}</td>
         <td>
           {% if s.structure_signal == 'failed_breakout' %}
             假突破回落
@@ -90,7 +90,7 @@
             中性
           {% endif %}
         </td>
-        <td>{{"%.4f"|format(s.funding_rate*100)}}%</td>
+        <td>{{"%.4f"|format((s.funding_rate or 0)*100)}}%</td>
         <td class="reason">{{s.reason}}</td>
         <td>{{s.created_at}}</td>
       </tr>
@@ -118,7 +118,7 @@
       {% for s in signals %}
       <tr>
         <td>{{s.symbol}}</td>
-        <td>{{"%.1f"|format(s.score)}}</td>
+        <td>{{"%.1f"|format(s.score or 0)}}</td>
         <td>{{s.entry_min}} ~ {{s.entry_max}}</td>
         <td>{{s.stop_loss}}</td>
         <td>{{s.take_profit_1}}</td>
