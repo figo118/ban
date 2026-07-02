@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="refresh" content="30">
+  <title>币安永续高位开空监控器</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { font-family: Arial, "Microsoft YaHei", sans-serif; background:#0f172a; color:#e2e8f0; margin:24px; }
+    h1, h2 { margin: 0 0 12px; }
+    h2 { margin-top: 28px; }
+    .subtle { color:#94a3b8; }
+    .toolbar { display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin:12px 0 20px; }
+    .badge { background:#1e293b; border:1px solid #334155; border-radius:999px; padding:6px 10px; color:#cbd5e1; }
+    table { border-collapse:collapse; width:100%; margin:16px 0; font-size:14px; }
+    td, th { border-bottom:1px solid #334155; padding:8px; text-align:right; white-space:nowrap; }
+    td:first-child, th:first-child { text-align:left; }
+    th { color:#cbd5e1; background:#111827; position:sticky; top:0; }
+    .table-wrap { overflow:auto; border:1px solid #334155; border-radius:12px; }
+    .reason { text-align:left; white-space:normal; min-width:260px; }
+    .l3 { color:#f87171; font-weight:700; }
+    .l2 { color:#facc15; font-weight:700; }
+    .l1 { color:#38bdf8; font-weight:700; }
+    .empty { padding:18px; color:#94a3b8; background:#111827; border:1px solid #334155; border-radius:12px; }
+  </style>
+</head>
+<body>
+  <h1>币安永续高位开空监控器</h1>
+  <p class="subtle">监控涨幅榜前 N 与手动自选币；三级信号为候选开空，仍需人工确认。</p>
+  <div class="toolbar">
+    <span class="badge">页面每 30 秒自动刷新</span>
+    <span class="badge">距离下次刷新：<span id="refresh-countdown">30</span> 秒</span>
+    <span class="badge">接口：/api/snapshots、/api/signals、/api/backtest/summary</span>
+  </div>
+
+  <h2>最新市场快照</h2>
+  {% if snapshots %}
+  <div class="table-wrap">
+    <table>
+      <tr>
+        <th>交易对</th><th>等级</th><th>分数</th><th>价格</th><th>1小时涨幅</th><th>4小时涨幅</th><th>24小时涨幅</th>
+        <th>15分钟RSI</th><th>15分钟持仓变化</th><th>多空账户比</th><th>主动买卖比</th><th>结构信号</th><th>大盘环境</th><th>资金费率</th><th>触发原因</th><th>时间</th>
+      </tr>
+      {% for s in snapshots %}
+      <tr>
+        <td>{{s.symbol}}</td>
+        <td class="l{{s.level}}">{{s.level}}级</td>
+        <td>{{"%.1f"|format(s.score)}}</td>
+        <td>{{s.price}}</td>
+        <td>{{"%.2f"|format(s.change_1h)}}%</td>
+        <td>{{"%.2f"|format(s.change_4h)}}%</td>
+        <td>{{"%.2f"|format(s.change_24h)}}%</td>
+        <td>{{"%.1f"|format(s.rsi_15m)}}</td>
+        <td>{{"%.2f"|format(s.oi_change_15m)}}%</td>
+        <td>{{"%.2f"|format(s.long_short_ratio)}}</td>
+        <td>{{"%.2f"|format(s.taker_buy_ratio)}}</td>
+        <td>{% if s.structure_signal == 'failed_breakout' %}假突破回落{% elif s.structure_signal == 'support_break' %}跌破支撑{% elif s.structure_signal == 'upper_wick_stall' %}长上影滞涨{% else %}等待确认{% endif %}</td>
+        <td>{% if s.market_state == 'risk_on_breakout' %}大盘强势突破{% elif s.market_state == 'risk_off' %}大盘回落{% else %}中性{% endif %}</td>
+        <td>{{"%.4f"|format(s.funding_rate*100)}}%</td>
+        <td class="reason">{{s.reason}}</td>
+        <td>{{s.created_at}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% else %}
+  <div class="empty">暂无快照数据。等待定时扫描，或调用 POST /api/scan/run 手动触发一次扫描。</div>
+  {% endif %}
+
+  <h2>候选开空信号</h2>
+  {% if signals %}
+  <div class="table-wrap">
+    <table>
+      <tr><th>交易对</th><th>分数</th><th>参考入场区间</th><th>止损</th><th>第一止盈</th><th>第二止盈</th><th>触发原因</th><th>时间</th></tr>
+      {% for s in signals %}
+      <tr>
+        <td>{{s.symbol}}</td><td>{{"%.1f"|format(s.score)}}</td><td>{{s.entry_min}} ~ {{s.entry_max}}</td><td>{{s.stop_loss}}</td><td>{{s.take_profit_1}}</td><td>{{s.take_profit_2}}</td><td class="reason">{{s.reason}}</td><td>{{s.created_at}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% else %}
+  <div class="empty">暂无三级候选开空信号。系统仍会继续监控过热币种。</div>
+  {% endif %}
+
+  <script>
+    let seconds = 30;
+    const node = document.getElementById("refresh-countdown");
+    setInterval(() => {
+      seconds = Math.max(0, seconds - 1);
+      node.textContent = seconds;
+    }, 1000);
+  </script>
+</body>
+</html>
